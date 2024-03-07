@@ -10,7 +10,7 @@ struct QuizQuestion {
     let correctAnswer: Bool
 }
 
-// Модель представления для состояния "Вопрос показан"
+// Структура представления для состояния "Вопрос показан"
 struct QuizStepViewModel {
     // Картинка с афишей фильма с типом UIImage
     let image: UIImage
@@ -20,7 +20,7 @@ struct QuizStepViewModel {
     let questionNumber: String
 }
 
-// Модель представления для состояния "Результат квиза"
+// Структура представления для состояния "Результат квиза"
 struct QuizResultsViewModel {
     // Строка с заголовком алерта
     let title: String
@@ -32,7 +32,7 @@ struct QuizResultsViewModel {
 
 final class MovieQuizViewController: UIViewController {
     // MARK: - Properties
-    private let questions: [QuizQuestion] = [
+    let questions: [QuizQuestion] = [
         QuizQuestion(
             image: "The Godfather",
             text: "Рейтинг этого фильма больше чем 6?",
@@ -76,14 +76,14 @@ final class MovieQuizViewController: UIViewController {
     ]
     
     // MARK: - Outlets
-    @IBOutlet var imageView: UIImageView!
-    @IBOutlet var textLabel: UILabel!
-    @IBOutlet var counterLabel: UILabel!
+    @IBOutlet private var imageView: UIImageView!
+    @IBOutlet private var textLabel: UILabel!
+    @IBOutlet private var counterLabel: UILabel!
     
     // Переменная с индексом текущего вопроса, начальное значение 0
-    private var currentQuestionIndex = 0
+    var currentQuestionIndex = 0
     // Переменная со счётчиком правильных ответов, начальное значение 0
-    private var correctAnswers = 0
+    var correctAnswers = 0
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
@@ -92,8 +92,8 @@ final class MovieQuizViewController: UIViewController {
         showFirstQuestion()
     }
     
-    // Приватный метод конвертации, который принимает моковый вопрос и возвращает модель представления для главного экрана
-    private func convert(model: QuizQuestion) -> QuizStepViewModel {
+    // Метод конвертации, который принимает моковый вопрос и возвращает модель представления для главного экрана
+    func convert(model: QuizQuestion) -> QuizStepViewModel {
         let questionStep = QuizStepViewModel(
             image: UIImage(named: model.image) ?? UIImage(),
             question: model.text,
@@ -102,8 +102,8 @@ final class MovieQuizViewController: UIViewController {
         return questionStep
     }
     
-    // Приватный метод вывода на экран вопроса
-    private func show(quiz step: QuizStepViewModel) {
+    // Метод вывода на экран вопроса
+    func show(quiz step: QuizStepViewModel) {
         imageView.image = step.image
         textLabel.text = step.question
         counterLabel.text = step.questionNumber
@@ -111,35 +111,36 @@ final class MovieQuizViewController: UIViewController {
     }
     
     // Показать первый вопрос
-    private func showFirstQuestion() {
+    func showFirstQuestion() {
         let firstQuestion = convert(model: questions[currentQuestionIndex])
         show(quiz: firstQuestion)
     }
     
-    // Приватный метод для отображения результата ответа
-    private func showAnswerResult(isCorrect: Bool) {
+    // Метод для отображения результата ответа
+    func showAnswerResult(isCorrect: Bool) {
         if isCorrect {
             correctAnswers += 1
         }
         imageView.layer.masksToBounds = true
         
         imageView.layer.borderWidth = 8
+        imageView.layer.cornerRadius = 20
         
         imageView.layer.borderColor = isCorrect ?
-        UIColor.ypGreen.cgColor : UIColor.ypRed.cgColor
+        UIColor.ypGreenIOS.cgColor : UIColor.ypRedIOS.cgColor
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             self.showNextQuestionOrResults()
         }
     }
     
-    // Приватный метод для сброса цвета рамки картинки
-    private func resetBorderColor() {
+    // Метод для сброса цвета рамки картинки
+    func resetBorderColor() {
         imageView.layer.borderColor = UIColor.clear.cgColor
     }
     
     // Показать следующий вопрос или результаты
-    private func showNextQuestionOrResults() {
+    func showNextQuestionOrResults() {
         if currentQuestionIndex == questions.count - 1 {
             showResults()
         } else {
@@ -151,8 +152,8 @@ final class MovieQuizViewController: UIViewController {
         }
     }
     
-    // Приватный метод для отображения результатов квиза
-    private func showResults() {
+    // Метод для отображения результатов квиза
+    func showResults() {
         let resultText = "Ваш результат: \(correctAnswers) из \(questions.count)"
         let resultsViewModel = QuizResultsViewModel(title: "Результат", text: resultText, buttonText: "Начать заново")
         
@@ -166,19 +167,19 @@ final class MovieQuizViewController: UIViewController {
     }
     
     // MARK: - Buttons
-    @IBAction func yesButtonClicked(_ sender: UIButton) {
+    @IBAction private func yesButtonClicked(_ sender: UIButton) {
         let givenAnswer = true
         let correctAnswer = questions[currentQuestionIndex].correctAnswer
         showAnswerResult(isCorrect: givenAnswer == correctAnswer)
     }
     
-    @IBAction  func noButtonClicked(_ sender: UIButton) {
+    @IBAction private func noButtonClicked(_ sender: UIButton) {
         let givenAnswer = false
         let correctAnswer = questions[currentQuestionIndex].correctAnswer
         showAnswerResult(isCorrect: givenAnswer == correctAnswer)
     }
-    // Приватный метод для сброса состояния квиза
-    private func resetQuiz() {
+    // Метод для сброса состояния квиза
+    func resetQuiz() {
         currentQuestionIndex = 0
         correctAnswers = 0
         showFirstQuestion()
@@ -186,66 +187,3 @@ final class MovieQuizViewController: UIViewController {
 }
 
 
-/*
- Mock-данные
- 
- 
- Картинка: The Godfather
- Настоящий рейтинг: 9,2
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: ДА
- 
- 
- Картинка: The Dark Knight
- Настоящий рейтинг: 9
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: ДА
- 
- 
- Картинка: Kill Bill
- Настоящий рейтинг: 8,1
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: ДА
- 
- 
- Картинка: The Avengers
- Настоящий рейтинг: 8
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: ДА
- 
- 
- Картинка: Deadpool
- Настоящий рейтинг: 8
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: ДА
- 
- 
- Картинка: The Green Knight
- Настоящий рейтинг: 6,6
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: ДА
- 
- 
- Картинка: Old
- Настоящий рейтинг: 5,8
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: НЕТ
- 
- 
- Картинка: The Ice Age Adventures of Buck Wild
- Настоящий рейтинг: 4,3
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: НЕТ
- 
- 
- Картинка: Tesla
- Настоящий рейтинг: 5,1
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: НЕТ
- 
- 
- Картинка: Vivarium
- Настоящий рейтинг: 5,8
- Вопрос: Рейтинг этого фильма больше чем 6?
- Ответ: НЕТ
-*/
